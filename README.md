@@ -1,0 +1,2 @@
+# Multivariate_High-dimensional_Bayesian_Variable_Selection
+Bayesian Variable Selection on Multivariate High-dimensional models assuming sparsity
