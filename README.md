@@ -3,5 +3,3 @@ Bayesian Variable Selection on Multivariate High-dimensional models assuming spa
 
 * Posterior probability framework derived from a spike-and-slab prior.
 * Simplified Shotgun Stochastic Search with Screening (S5) algorithm.
-* Consistency of the proposed posterior.
-* Competing approaches.
