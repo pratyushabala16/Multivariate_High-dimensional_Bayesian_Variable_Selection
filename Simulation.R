@@ -405,7 +405,7 @@ names(g_values) <- c("log(p)","2log(p)","2.5log(p)","log(q)","2log(q)","2.5log(q
 results <- data.frame() # stores the accepted models and metrics
 STAR <- list() # stores the MPP values
 for (g in g_values) {
-    result <- s_53_log(X, Y = Y, L = 50, J = 100, burnin = 0.4,
+    result <-multivariate_hd_bayesian_vs(X, Y = Y, L = 50, J = 100, burnin = 0.4,
                        temp = seq(1, 0.1, length.out = 100), g = g)
     
     res_map <- cbind(g = g, Method = "MAP", Predictors = paste(result$MAP, collapse = ","),
@@ -421,4 +421,5 @@ for (g in g_values) {
     names(STAR) <- names(g_values) 
 }
 save(results,file="results.Rdata")
+
 
