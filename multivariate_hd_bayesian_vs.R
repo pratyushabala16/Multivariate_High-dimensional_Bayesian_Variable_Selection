@@ -4,7 +4,7 @@ library(Matrix)
 library(MASS)
 library(LaplacesDemon) # sampling omega
 library(matrixsampling)# or LaplacesDemon to sample MxVT
-###############################################
+##################################################################
 # hyperparameter tau
 tau <- 1e-5
 ##################################################################
@@ -359,7 +359,7 @@ PRFJ <- function(model, true){
               ))
 }
 
-##################################################
+###############################################################################
 # Simulation Run
 # data
 n <- 200 # no of samples
@@ -421,5 +421,6 @@ for (g in g_values) {
     names(STAR) <- names(g_values) 
 }
 save(results,file="results.Rdata")
+
 
 
