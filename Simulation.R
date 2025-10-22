@@ -52,27 +52,6 @@ log_post_comparison <- function(X,Y,selected_vars, s){
   
   return(log_num - log_den)
 }
-
-### post processing functions for comparison
-PRFJ <- function(model, true){
-  TP <-	length(intersect(model, true))#correctly selected	
-  FP <- length(setdiff(model, true))#wrongly selected	
-  FN <-	length(setdiff(true, model))#missed true vars
-  
-  precision <- TP/(TP+FP)
-  recall <- TP/(TP+FN)
-  F1 <- 2*(precision*recall)/(precision+recall)
-  Jaccard <- length(intersect(model,true))/
-    length(union(model,true))
-  norm_BbyB0 <- norm(B[model,],"2")/norm(B[true,],"2")
-  
-  return(list(precision = precision,
-              recall = recall,
-              F1 = F1,
-              Jaccard_index = Jaccard,
-              norm_BbyB0 = norm_BbyB0
-              ))
-}
   
 ### sampling for posterior mean of B from MxVT(M,Sigma,Omega,neu)
 B_gamma <- function(X,Y,selected_vars){
@@ -358,6 +337,28 @@ multivariate_hd_bayesian_vs <- function(X, Y, temp = seq(1, 0.1, length.out = 20
     ))
 }
 
+
+### post processing functions for comparison
+PRFJ <- function(model, true){
+  TP <-	length(intersect(model, true))#correctly selected	
+  FP <- length(setdiff(model, true))#wrongly selected	
+  FN <-	length(setdiff(true, model))#missed true vars
+  
+  precision <- TP/(TP+FP)
+  recall <- TP/(TP+FN)
+  F1 <- 2*(precision*recall)/(precision+recall)
+  Jaccard <- length(intersect(model,true))/
+    length(union(model,true))
+  norm_BbyB0 <- norm(B[model,],"2")/norm(B[true,],"2")
+  
+  return(list(precision = precision,
+              recall = recall,
+              F1 = F1,
+              Jaccard_index = Jaccard,
+              norm_BbyB0 = norm_BbyB0
+              ))
+}
+
 ##################################################
 # Simulation Run
 # data
@@ -366,8 +367,34 @@ p <- 1000 # no of covariates
 p0 <- 15 # no of true covariates
 q <- 10 # no of responses; q < p0
                          
-cov_x = "indpt";
-rho =0.7 # y has dense covariance 
+X = matrix(rnorm(n*p),n,p)
+X = scale(X) # cov_x = "indpt"
+
+# simulate B covariate matrix of your own choice
+B <- matrix(0, nrow = p, ncol = q) 
+true_indices <- sort(sample(1:p, p0)) # all imporatant covariates
+top <- strong_rows[1:floor(p0/3)] # highly important covariates
+mid <- strong_rows[ceiling(p0/3):floor(2*p0/3)] # mid important covariates
+low <- strong_rows[ceiling(2*p0/3):p0] # low important covariates
+
+B[top, ] <- matrix(sample(c(-2, -1, 1, 2), length(top)*q, prob=c(0.1,0.4,0.4,0.1),replace = TRUE), nrow = length(top))
+for (r in mid) {
+    pos <- sample(1:q, q/2)
+    B[r, pos] <- sample(c(-1,-2, 2,1),prob=c(0.2,0.3,0.3,0.2), length(pos), replace = TRUE)
+}
+for (r in low) {
+    pos <- sample(1:q, ceiling(q/4))
+    B[r, pos] <- sample(c(-2, 2), length(pos), replace = TRUE)
+}
+# adjust for SNR
+norms_q <- NULL
+for ( i in strong_rows){
+    norms_q <- rbind(norms_q, norm(B[i,1:q],type = '2'))
+}
+B <- B/floor(sqrt(max(norms_q)))
+
+# simualate y
+rho =0.7 # if y has dense covariance 
 cov_y = (rho * matrix(1, q, q) + (1 - rho) * diag(q))
 E <- mvrnorm(n, rep(0, q), cov_y)
 Y <- scale(X %*% B + E)                        
@@ -394,3 +421,4 @@ for (g in g_values) {
     names(STAR) <- names(g_values) 
 }
 save(results,file="results.Rdata")
+
